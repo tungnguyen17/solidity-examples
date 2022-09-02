@@ -1,0 +1,6 @@
+# EVM contract project
+/artifacts
+/cache
+/node_modules
+/package-lock.json
+/typechain-types
