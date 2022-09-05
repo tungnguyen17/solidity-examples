@@ -75,6 +75,21 @@ contract MessageValidator {
     return result;
   }
 
+  function checkSignatureWithParams1(
+    string[] memory codes_,
+    address payable[] memory addresses_,
+    uint256[] memory amounts_,
+    bytes memory signature_
+  ) public view returns (bool) {
+
+    string memory combinedCode = concatStrings(codes_);
+    bytes32 dataHash = keccak256(abi.encodePacked(combinedCode, addresses_, amounts_));
+    return checkSignature(
+      dataHash,
+      signature_
+    );
+  }
+
   /// @dev divides bytes signature into `uint8 v, bytes32 r, bytes32 s`.
   /// @param signature_ concatenated rsv signatures
   function signatureSplit(
@@ -128,6 +143,20 @@ contract MessageValidator {
       // use the second best option, 'and'
       v := and(mload(add(signatures_, add(pos, 0x41))), 0xff)
     }
+  }
+
+  function concatStrings(
+    string[] memory words
+  ) public pure returns (
+    string memory
+  ) {
+    bytes memory output;
+
+    for (uint256 i = 0; i < words.length; i++) {
+      output = abi.encodePacked(output, "|||", words[i]);
+    }
+
+    return string(output);
   }
 
   function toBytes(bytes32 data) public pure returns (bytes memory) {

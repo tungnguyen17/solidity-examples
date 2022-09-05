@@ -57,6 +57,41 @@ describe('check_single_signature_test', function() {
       ["128", "0x71C7656EC7ab88b098defB751B7401B5f6d8976F"],
     )
   })
+
+  it('custom_params_1', async function() {
+    const [signer1, signer2, signer3] = await hre.ethers.getSigners();
+    const messageValidator = MessageValidator.attach(messageValidatorAddress);
+
+    const codes: string[] = [
+      'abcdef',
+      'abcdex',
+    ];
+    const addresses: string[] = [
+      signer2.address,
+      signer3.address,
+    ];
+    const amounts: number[] = [
+      256,
+      768,
+    ];
+    const combinedCode = '|||' + codes.join('|||');
+
+    const hash = ethers.utils.solidityKeccak256(
+      ["string", "address[]", "uint256[]"],
+      [combinedCode, addresses, amounts],
+    );
+    const hashBytes = ethers.utils.arrayify(hash);
+    const signature = await signer1.signMessage(hashBytes);
+
+    const isSuccess = await messageValidator.connect(signer1)
+      .checkSignatureWithParams1(
+        codes,
+        addresses,
+        amounts,
+        signature,
+      );
+    expect(isSuccess).is.true;
+  })
 })
 
 async function precomputedHash(
