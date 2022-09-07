@@ -33,7 +33,7 @@ contract Factory {
       result := create(0, clone, 0x37)
     }
 
-    ERC20(result).init(name, symbol);
+    MasterCopy(result).init(name, symbol);
     emit Deployed(result);
   }
 }

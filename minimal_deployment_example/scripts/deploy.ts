@@ -2,7 +2,7 @@ import { ethers } from 'hardhat';
 
 async function main() {
 
-  const MasterCopy = await ethers.getContractFactory('ERC20');
+  const MasterCopy = await ethers.getContractFactory('MasterCopy');
   const masterCopy = await MasterCopy.deploy('MasterCopy', 'MAS');
   await masterCopy.deployed();
 

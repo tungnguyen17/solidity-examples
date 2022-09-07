@@ -1,22 +1,22 @@
 import hre from 'hardhat';
 import { expect } from 'chai';
 import {
-  ERC20,
-  ERC20__factory,
   Factory,
-  Factory__factory
+  Factory__factory,
+  MasterCopy,
+  MasterCopy__factory,
 } from '../types';
 
 describe('minimal_deployment_test', function() {
 
-  let MasterCopy: ERC20__factory;
+  let MasterCopy: MasterCopy__factory;
   let masterCopyAddress: string;
   let CloneFactory: Factory__factory;
   let cloneFactoryAddress: string;
 
   this.beforeAll(async function() {
-    MasterCopy = await hre.ethers.getContractFactory('ERC20');
-    const masterCopy: ERC20 = await MasterCopy.deploy('Master Copy', 'MASTER');
+    MasterCopy = await hre.ethers.getContractFactory('MasterCopy');
+    const masterCopy: MasterCopy = await MasterCopy.deploy('Master Copy', 'MASTER');
     await masterCopy.deployed();
     masterCopyAddress = masterCopy.address;
 
@@ -27,7 +27,7 @@ describe('minimal_deployment_test', function() {
   })
 
   it('check master copy name and symbol', async function() {
-    const masterCopy: ERC20 = MasterCopy.attach(masterCopyAddress);
+    const masterCopy: MasterCopy = MasterCopy.attach(masterCopyAddress);
     const tokenName = await masterCopy.name();
 
     expect(tokenName).equal('Master Copy');
@@ -40,7 +40,7 @@ describe('minimal_deployment_test', function() {
     const deployTxR = await deployTx.wait();
 
     const customTokenAddress = deployTxR.logs[1].topics[1].replace('0x000000000000000000000000', '0x');
-    const customToken: ERC20 = MasterCopy.attach(customTokenAddress);
+    const customToken: MasterCopy = MasterCopy.attach(customTokenAddress);
 
     const tokenName = await customToken.name();
 
