@@ -22,8 +22,8 @@ contract MessageValidator {
     } else if (v == 1) {
       // If v is 1 then it is an approved hash
       // When handling approved hashes the address of the approver is encoded into r
-      signer = address(uint160(uint256(r)));
       // Hashes are automatically approved by the sender of the message or when they have been pre-approved via a separate transaction
+      // Not supported
     } else if (v > 30) {
       // If v > 30 then default va (27,28) has been adjusted for eth_sign flow
       // To support eth_sign and similar we adjust v and hash the messageHash with the Ethereum message prefix before applying ecrecover
@@ -46,9 +46,10 @@ contract MessageValidator {
     bytes32 r;
     bytes32 s;
     uint256 i;
+    address previousSigner = address(0);
     result = 0;
     for (i = 0; (i + 1) * 65 <= signatures_.length; i++) {
-      address signer;
+      address signer = address(0);
       (v, r, s) = signatureSplitN(signatures_, i);
       if (v == 0) {
         // If v is 0 then it is a contract signature
@@ -56,8 +57,8 @@ contract MessageValidator {
       } else if (v == 1) {
         // If v is 1 then it is an approved hash
         // When handling approved hashes the address of the approver is encoded into r
-        signer = address(uint160(uint256(r)));
         // Hashes are automatically approved by the sender of the message or when they have been pre-approved via a separate transaction
+        // Not supported
       } else if (v > 30) {
         // If v > 30 then default va (27,28) has been adjusted for eth_sign flow
         // To support eth_sign and similar we adjust v and hash the messageHash with the Ethereum message prefix before applying ecrecover
@@ -67,8 +68,12 @@ contract MessageValidator {
         // Use ecrecover with the messageHash for EOA signatures
         signer = ecrecover(keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", dataHash_)), v, r, s);
       }
+      bool isOrdered = previousSigner < signer;
+      if(isOrdered) {
+        previousSigner = signer;
+      }
       bool isMatch = signer == addresses_[i];
-      if(isMatch) {
+      if(isMatch && isOrdered) {
         ++result;
       }
     }

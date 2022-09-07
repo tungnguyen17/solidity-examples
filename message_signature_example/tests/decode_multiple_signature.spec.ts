@@ -65,13 +65,22 @@ async function precomputedHash(
     params,
   );
   const hashBytes = ethers.utils.arrayify(hash);
-  const signatures = await Promise.all(signers.map(async signer => {
+  const signatureMetas = await Promise.all(signers.map(async signer => {
     const signature = await signer.signMessage(hashBytes);
-    return signature.substring(2);
+    return [signer.address, signature.substring(2)];
   }));
-  const finalSignature = ethers.utils.arrayify('0x' + signatures.join(''));
+  const sortedSignatureMetas = signatureMetas.sort((x, y) => {
+    if(x[0] < y[0]) {
+      return -1;
+    }
+    if(x[0] > y[0]) {
+      return 1;
+    }
+    return 0;
+  });
+  const finalSignature = ethers.utils.arrayify('0x' + sortedSignatureMetas.map(x => x[1]).join(''));
 
-  const addresses = signers.map(x => x.address);
+  const addresses = sortedSignatureMetas.map(x => x[0]);
   const count = await messageValidator.connect(signers[0])
     .checkSignatures(
       hashBytes,
