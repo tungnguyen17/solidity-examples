@@ -5,7 +5,7 @@ import {
   NumericBitmap__factory
 } from '../types';
 
-describe('manipulate_single_bitmap_test', function() {
+describe('manipulate_double_bitmap_test', function() {
 
   let NumericBitmap: NumericBitmap__factory;
   let numericBitmapAddress: string;
@@ -23,8 +23,8 @@ describe('manipulate_single_bitmap_test', function() {
 
     await check_indexes(
       numericBitmap,
-      [0, 2, 4],
-      21,
+      [1, 6, 3, 7],
+      [[0, 202], [1, 0], [2, 0], [3, 0]],
     );
   })
 
@@ -34,8 +34,8 @@ describe('manipulate_single_bitmap_test', function() {
 
     await check_indexes(
       numericBitmap,
-      [1, 6, 3, 7],
-      202,
+      [256, 6, 515, 3, 7, 65536],
+      [[0, 200], [1, 1], [2, 8], [3, 0], [256, 1]],
     );
   })
 })
@@ -43,20 +43,22 @@ describe('manipulate_single_bitmap_test', function() {
 async function check_indexes(
   numericBitmap: NumericBitmap,
   indexes: number[],
-  expectedValue: number,
+  expectedValues: [number, number][],
 ) {
   for(var index of indexes) {
-    await numericBitmap.writeSingleBitmap(
+    await numericBitmap.writeDoubleBitmap(
       index,
       true,
     );
   }
   for(var index of indexes) {
-    const state = await numericBitmap.readSingleBitmap(
+    const state = await numericBitmap.readDoubleBitmap(
       index,
     );
     expect(state).is.true;
   }
-  const rawBitmapValue = await numericBitmap.singleBitmapValue();
-  expect(rawBitmapValue).is.equal(expectedValue);
+  for(var expectedValue of expectedValues) {
+    const rawBitmapValue = await numericBitmap.doubleBitmapValue(expectedValue[0]);
+    expect(rawBitmapValue).is.equal(expectedValue[1]);
+  }
 }
