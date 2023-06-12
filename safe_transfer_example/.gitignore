@@ -1,0 +1,14 @@
+# EVM contract project
+/.DS_Store
+/.env
+/.npmrc
+/.yarn
+/artifacts
+/cache
+/dist
+/node_modules
+/package-lock.json
+/typechain-types
+/yarn-error.log
+/yarn.lock
+
